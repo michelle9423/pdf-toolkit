@@ -5,20 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDF 工具箱</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+  @font-face {
+    font-family: 'jf-openhuninn';
+    src: url('https://cdn.jsdelivr.net/gh/justfont/open-huninn-font@main/font/jf-openhuninn-2.1.woff2') format('woff2');
+    font-weight: normal; font-style: normal; font-display: swap;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #F5F2EC; --surface: #FEFCF8; --surface2: #EDE9E0;
     --border: #D4CFC4; --text: #1A1814; --muted: #7A756A;
-    --accent: #2D4A3E; --red: #C0392B; --green: #27AE60; --tag: #E8E3D8;
+    --accent: #1B6B3A; --red: #C0392B; --green: #27AE60; --tag: #E8E3D8;
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   header { background: var(--accent); padding: 16px 40px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
-  header .logo { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 24px; color: #E8E3D8; }
+  header .logo { font-family: 'jf-openhuninn', 'Instrument Serif', serif; font-style: italic; font-size: 24px; color: #E8E3D8; }
   header .logo span { color: #A8C5A0; }
-  header .sub { font-family: 'DM Mono', monospace; font-size: 10px; color: #A8C5A0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
-  header .badge { margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #A8C5A0; font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; }
+  header .sub { font-family: 'jf-openhuninn', 'DM Mono', monospace; font-size: 10px; color: #A8C5A0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+  header .badge { font-family: 'jf-openhuninn', monospace; margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #A8C5A0; font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; }
 
   .tabs { display: flex; border-bottom: 2px solid var(--border); padding: 0 40px; background: var(--surface); }
   .tab { padding: 13px 24px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--muted); transition: all 0.2s; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
@@ -29,7 +34,7 @@
   .panel { display: none; } .panel.active { display: block; }
 
   .section-head { margin-bottom: 22px; }
-  .section-head h2 { font-family: 'Instrument Serif', serif; font-size: 26px; font-weight: 400; }
+  .section-head h2 { font-family: 'jf-openhuninn', 'Instrument Serif', serif; font-size: 26px; font-weight: 400; }
   .section-head p { color: var(--muted); font-size: 13px; margin-top: 5px; line-height: 1.6; }
 
   /* Drop zone */
@@ -43,7 +48,7 @@
   .single-drop { max-width: 480px; }
 
   /* Buttons */
-  .btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'jf-openhuninn', sans-serif; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover:not(:disabled) { background: #1e3329; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,74,62,0.25); }
   .btn-secondary { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
@@ -93,7 +98,7 @@
   .file-name { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .file-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 1px; }
   .rot-tag { background: var(--accent); color: white; font-family: 'DM Mono', monospace; font-size: 10px; padding: 1px 7px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }
-  .expand-btn { background: none; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--muted); padding: 4px 10px; transition: all 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif; flex-shrink: 0; }
+  .expand-btn { background: none; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--muted); padding: 4px 10px; transition: all 0.15s; white-space: nowrap; font-family: 'jf-openhuninn', sans-serif; flex-shrink: 0; }
   .expand-btn:hover { border-color: var(--accent); color: var(--accent); }
   .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; line-height: 1; flex-shrink: 0; }
   .remove-btn:hover { background: #fee; color: var(--red); }
@@ -103,7 +108,7 @@
   .rotate-panel.open { display: block; }
   .rp-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
   .rp-toolbar .rp-label { font-size: 12px; color: var(--muted); margin-right: 2px; }
-  .rot-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .rot-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s; font-family: 'jf-openhuninn', sans-serif; white-space: nowrap; }
   .rot-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Thumbnail grid — MERGE */
@@ -164,9 +169,46 @@
   .range-row input[type=number] { width: 58px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; font-size: 12px; font-family: 'DM Mono', monospace; background: var(--bg); color: var(--text); text-align: center; }
   .range-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 14px; padding: 3px 6px; border-radius: 4px; }
   .range-del:hover { background: #fee; color: var(--red); }
-  .add-range-btn { background: transparent; border: 1.5px dashed var(--border); color: var(--muted); border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer; width: 100%; margin-top: 4px; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .add-range-btn { background: transparent; border: 1.5px dashed var(--border); color: var(--muted); border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer; width: 100%; margin-top: 4px; transition: all 0.2s; font-family: 'jf-openhuninn', sans-serif; }
   .add-range-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+
+  /* ═══ LIGHTBOX ═════════════════════════════════════ */
+  #lightbox {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.82);
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox-inner {
+    background: white; border-radius: 12px; padding: 16px;
+    max-width: 88vw; max-height: 90vh;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  #lightbox-canvas-wrap { overflow: auto; max-height: 80vh; }
+  #lightbox-canvas-wrap canvas { display: block; border-radius: 6px; }
+  #lightbox-label {
+    font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  #lightbox-close {
+    position: absolute; top: 10px; right: 12px;
+    background: none; border: none; font-size: 20px; cursor: pointer;
+    color: var(--muted); line-height: 1; padding: 4px;
+    border-radius: 4px; transition: all 0.15s;
+  }
+  #lightbox-close:hover { background: #fee; color: var(--red); }
+  .thumb-zoom-btn {
+    position: absolute; bottom: 22px; right: 4px;
+    background: rgba(45,74,62,0.85); color: white;
+    border: none; border-radius: 5px; cursor: pointer;
+    font-size: 11px; padding: 2px 5px; line-height: 1.4;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .thumb-cell:hover .thumb-zoom-btn,
+  .page-thumb:hover .thumb-zoom-btn { opacity: 1; }
   ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
@@ -317,6 +359,16 @@
     </div>
   </div>
   <div class="alert alert-error" id="rotate-error"></div>
+</div>
+
+
+<!-- ══════ LIGHTBOX ══════ -->
+<div id="lightbox" onclick="closeLightbox(event)">
+  <div id="lightbox-inner">
+    <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+    <div id="lightbox-label"></div>
+    <div id="lightbox-canvas-wrap"></div>
+  </div>
 </div>
 
 </div><!-- /content -->
@@ -480,6 +532,7 @@ function renderMergeList() {
                 <div class="thumb-loading">載入中</div>
               </div>
               <div class="thumb-num">P${pi+1}</div>
+              <button class="thumb-zoom-btn" onclick="event.stopPropagation();openLightbox(${i},${pi})">🔍</button>
             </div>`).join('')}
         </div>
       </div>
@@ -586,14 +639,17 @@ async function mergePDFs() {
       lbl.textContent=`第 ${i+1}/${mergeFiles.length}：${f.name}`;
       bar.style.width=`${5+Math.round(i/mergeFiles.length*80)}%`;
       const src = await PDFLib.PDFDocument.load(f.bytes,{ignoreEncryption:true});
-      const pages = await merged.copyPages(src, src.getPageIndices());
-      pages.forEach((p, pi) => {
-        if (f.rotations[pi] && f.rotations[pi] !== 0) {
+      // apply rotations to src BEFORE copying
+      const srcPages = src.getPages();
+      srcPages.forEach((p, pi) => {
+        const deg = f.rotations[pi] || 0;
+        if (deg !== 0) {
           const cur = p.getRotation().angle;
-          p.setRotation(PDFLib.degrees((cur + f.rotations[pi]) % 360));
+          p.setRotation(PDFLib.degrees((cur + deg) % 360));
         }
-        merged.addPage(p);
       });
+      const pages = await merged.copyPages(src, src.getPageIndices());
+      pages.forEach(p => merged.addPage(p));
       await tick();
     }
     lbl.textContent='寫入…'; bar.style.width='92%';
@@ -642,6 +698,7 @@ async function renderRotateGrid() {
       <span class="rot-badge" id="rb-${i}">0°</span>
       <div class="canvas-wrap" id="rcw-${i}"><div class="thumb-loading">載入中</div></div>
       <div class="thumb-num">第 ${i+1} 頁</div>
+      <button class="thumb-zoom-btn" onclick="event.stopPropagation();openLightboxRotate(${i})">🔍</button>
     </div>`).join('');
   updateRotSelCount();
   // render thumbnails
@@ -802,6 +859,46 @@ function downloadBytes(bytes,name) {
 }
 function showError(mode,msg){const el=document.getElementById(mode+'-error');el.textContent='⚠️ '+msg;el.classList.add('show');}
 function hideError(mode){document.getElementById(mode+'-error')?.classList.remove('show');}
+
+// ═══════════════════════════════════════════════════
+// LIGHTBOX
+// ═══════════════════════════════════════════════════
+async function openLightbox(fi, pi) {
+  const f = mergeFiles[fi];
+  if (!f.pdfJsDoc) return;
+  const lb = document.getElementById('lightbox');
+  const wrap = document.getElementById('lightbox-canvas-wrap');
+  const label = document.getElementById('lightbox-label');
+  label.textContent = `${f.name}  ·  第 ${pi+1} 頁${f.rotations[pi] ? '  ·  旋轉 '+f.rotations[pi]+'°' : ''}`;
+  wrap.innerHTML = '<div style="padding:40px;color:#999;font-size:13px;">渲染中…</div>';
+  lb.classList.add('open');
+  // render at larger size
+  const canvas = await renderThumb(f.pdfJsDoc, pi, f.rotations[pi] || 0, 600);
+  wrap.innerHTML = '';
+  wrap.appendChild(canvas);
+}
+
+async function openLightboxRotate(pi) {
+  const s = singleState.rotate;
+  if (!s.pdfJsDoc) return;
+  const lb = document.getElementById('lightbox');
+  const wrap = document.getElementById('lightbox-canvas-wrap');
+  const label = document.getElementById('lightbox-label');
+  label.textContent = `${s.name}  ·  第 ${pi+1} 頁${s.rotations[pi] ? '  ·  旋轉 '+s.rotations[pi]+'°' : ''}`;
+  wrap.innerHTML = '<div style="padding:40px;color:#999;font-size:13px;">渲染中…</div>';
+  lb.classList.add('open');
+  const canvas = await renderThumb(s.pdfJsDoc, pi, s.rotations[pi] || 0, 600);
+  wrap.innerHTML = '';
+  wrap.appendChild(canvas);
+}
+
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && e.target !== document.getElementById('lightbox-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-canvas-wrap').innerHTML = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open'); });
 </script>
 </body>
 </html>
