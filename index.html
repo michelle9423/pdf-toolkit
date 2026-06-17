@@ -465,9 +465,14 @@ async function renderThumb(pdfJsDoc, pi, rotDeg, width=68) {
   if (!pdfJsDoc) { canvas.width=width; canvas.height=Math.round(width*1.35); const ctx=canvas.getContext('2d'); ctx.fillStyle='#eee'; ctx.fillRect(0,0,canvas.width,canvas.height); return canvas; }
   try {
     const page = await pdfJsDoc.getPage(pi+1);
-    const vp0  = page.getViewport({scale:1, rotation:0});
-    const scale = width / vp0.width;
-    const vp    = page.getViewport({scale, rotation: rotDeg});
+    // Get natural viewport (PDF.js applies page's own /Rotate automatically)
+    const vpNatural = page.getViewport({scale:1});
+    // Add user's delta rotation on top
+    const totalRot = (vpNatural.rotation + rotDeg) % 360;
+    const vp0 = page.getViewport({scale:1, rotation: totalRot});
+    // Scale based on the longer side so portrait/landscape both fit nicely
+    const scale = width / Math.max(vp0.width, 1);
+    const vp = page.getViewport({scale, rotation: totalRot});
     canvas.width  = Math.round(vp.width);
     canvas.height = Math.round(vp.height);
     await page.render({canvasContext: canvas.getContext('2d'), viewport: vp}).promise;
@@ -639,18 +644,29 @@ async function mergePDFs() {
       lbl.textContent=`第 ${i+1}/${mergeFiles.length}：${f.name}`;
       bar.style.width=`${5+Math.round(i/mergeFiles.length*80)}%`;
       const src = await PDFLib.PDFDocument.load(f.bytes,{ignoreEncryption:true});
-      const pages = await merged.copyPages(src, src.getPageIndices());
-      pages.forEach((p, pi) => {
-        const deg = f.rotations[pi] || 0;
-        const startPageCount = merged.getPageCount();
-        merged.addPage(p);
-        if (deg !== 0) {
-          // get the page we just added by its index in merged
-          const addedPage = merged.getPage(startPageCount);
-          const cur = addedPage.getRotation().angle;
-          addedPage.setRotation(PDFLib.degrees((cur + deg) % 360));
+      // f.rotations[pi] is the user's desired visual delta (what PDF.js shows).
+      // PDF.js renderThumb uses rotation:0 as base, so f.rotations[pi] IS the absolute
+      // visual rotation the user wants ON TOP OF the page's own /Rotate.
+      // We set the final /Rotate = (existing_page_rotate + user_delta) % 360
+      const srcPagesArr = src.getPages();
+      let hasRotation = false;
+      srcPagesArr.forEach((p, pi) => {
+        const delta = f.rotations[pi] || 0;
+        if (delta !== 0) {
+          hasRotation = true;
+          // Set absolute rotation: existing + delta
+          const existing = p.getRotation().angle || 0;
+          p.setRotation(PDFLib.degrees((existing + delta) % 360));
         }
       });
+      let finalSrc = src;
+      if (hasRotation) {
+        // bake by save+reload
+        const rotatedBytes = await src.save();
+        finalSrc = await PDFLib.PDFDocument.load(rotatedBytes);
+      }
+      const pages = await merged.copyPages(finalSrc, finalSrc.getPageIndices());
+      pages.forEach(p => merged.addPage(p));
       await tick();
     }
     lbl.textContent='寫入…'; bar.style.width='92%';
