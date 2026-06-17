@@ -641,12 +641,14 @@ async function mergePDFs() {
       const src = await PDFLib.PDFDocument.load(f.bytes,{ignoreEncryption:true});
       const pages = await merged.copyPages(src, src.getPageIndices());
       pages.forEach((p, pi) => {
-        // apply rotation AFTER addPage so the page belongs to merged doc
-        const pageRef = merged.addPage(p);
         const deg = f.rotations[pi] || 0;
+        const startPageCount = merged.getPageCount();
+        merged.addPage(p);
         if (deg !== 0) {
-          const cur = pageRef.getRotation().angle;
-          pageRef.setRotation(PDFLib.degrees((cur + deg) % 360));
+          // get the page we just added by its index in merged
+          const addedPage = merged.getPage(startPageCount);
+          const cur = addedPage.getRotation().angle;
+          addedPage.setRotation(PDFLib.degrees((cur + deg) % 360));
         }
       });
       await tick();
