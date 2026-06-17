@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDF 工具箱</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
   @font-face {
-    font-family: 'jf-openhuninn';
+    font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif;
     src: url('https://cdn.jsdelivr.net/npm/open-huninn-font@2.1.0/font/jf-openhuninn-2.1.woff2') format('woff2'),
          url('https://cdn.jsdelivr.net/npm/open-huninn-font@2.1.0/font/jf-openhuninn-2.1.ttf') format('truetype');
     font-weight: normal; font-style: normal; font-display: swap;
@@ -21,10 +21,10 @@
   body { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   header { background: var(--accent); padding: 16px 40px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
-  header .logo { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; font-style: italic; font-size: 24px; color: #E8E3D8; }
+  header .logo { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; font-style: normal; font-size: 24px; color: #E8E3D8; }
   header .logo span { color: #A8C5A0; }
   header .sub { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; font-size: 10px; color: #A8C5A0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
-  header .badge { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #A8C5A0; font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; }
+  header .badge { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #A8C5A0; font-size: 10px; padding: 4px 10px; border-radius: 20px; }
 
   .tabs { display: flex; border-bottom: 2px solid var(--border); padding: 0 40px; background: var(--surface); }
   .tab { padding: 13px 24px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--muted); transition: all 0.2s; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
