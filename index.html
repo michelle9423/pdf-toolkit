@@ -202,14 +202,13 @@
   }
   #lightbox-close:hover { background: #fee; color: var(--red); }
   .thumb-zoom-btn {
-    position: absolute; bottom: 22px; right: 4px;
-    background: rgba(45,74,62,0.85); color: white;
-    border: none; border-radius: 5px; cursor: pointer;
-    font-size: 11px; padding: 2px 5px; line-height: 1.4;
-    opacity: 0; transition: opacity 0.15s;
+    display: block; width: 100%; margin-top: 5px;
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 4px; cursor: pointer;
+    font-size: 10px; padding: 2px 0; line-height: 1.6;
+    transition: all 0.15s; font-family: 'jf-openhuninn', sans-serif;
   }
-  .thumb-cell:hover .thumb-zoom-btn,
-  .page-thumb:hover .thumb-zoom-btn { opacity: 1; }
+  .thumb-zoom-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
   ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
@@ -533,7 +532,7 @@ function renderMergeList() {
                 <div class="thumb-loading">載入中</div>
               </div>
               <div class="thumb-num">P${pi+1}</div>
-              <button class="thumb-zoom-btn" onclick="event.stopPropagation();openLightbox(${i},${pi})">🔍</button>
+              <button class="thumb-zoom-btn" onclick="event.stopPropagation();openLightbox(${i},${pi})">🔍 放大</button>
             </div>`).join('')}
         </div>
       </div>
@@ -640,17 +639,16 @@ async function mergePDFs() {
       lbl.textContent=`第 ${i+1}/${mergeFiles.length}：${f.name}`;
       bar.style.width=`${5+Math.round(i/mergeFiles.length*80)}%`;
       const src = await PDFLib.PDFDocument.load(f.bytes,{ignoreEncryption:true});
-      // apply rotations to src BEFORE copying
-      const srcPages = src.getPages();
-      srcPages.forEach((p, pi) => {
+      const pages = await merged.copyPages(src, src.getPageIndices());
+      pages.forEach((p, pi) => {
+        // apply rotation AFTER addPage so the page belongs to merged doc
+        const pageRef = merged.addPage(p);
         const deg = f.rotations[pi] || 0;
         if (deg !== 0) {
-          const cur = p.getRotation().angle;
-          p.setRotation(PDFLib.degrees((cur + deg) % 360));
+          const cur = pageRef.getRotation().angle;
+          pageRef.setRotation(PDFLib.degrees((cur + deg) % 360));
         }
       });
-      const pages = await merged.copyPages(src, src.getPageIndices());
-      pages.forEach(p => merged.addPage(p));
       await tick();
     }
     lbl.textContent='寫入…'; bar.style.width='92%';
@@ -699,7 +697,7 @@ async function renderRotateGrid() {
       <span class="rot-badge" id="rb-${i}">0°</span>
       <div class="canvas-wrap" id="rcw-${i}"><div class="thumb-loading">載入中</div></div>
       <div class="thumb-num">第 ${i+1} 頁</div>
-      <button class="thumb-zoom-btn" onclick="event.stopPropagation();openLightboxRotate(${i})">🔍</button>
+      <button class="thumb-zoom-btn" onclick="event.stopPropagation();openLightboxRotate(${i})">🔍 放大</button>
     </div>`).join('');
   updateRotSelCount();
   // render thumbnails
