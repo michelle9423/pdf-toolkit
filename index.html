@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDF 工具箱</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap');
   @font-face {
     font-family: 'jf-openhuninn';
-    src: url('https://cdn.jsdelivr.net/gh/justfont/open-huninn-font@main/font/jf-openhuninn-2.1.woff2') format('woff2');
+    src: url('https://cdn.jsdelivr.net/npm/open-huninn-font@2.1.0/font/jf-openhuninn-2.1.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/npm/open-huninn-font@2.1.0/font/jf-openhuninn-2.1.ttf') format('truetype');
     font-weight: normal; font-style: normal; font-display: swap;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,10 +21,10 @@
   body { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   header { background: var(--accent); padding: 16px 40px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
-  header .logo { font-family: 'jf-openhuninn', 'Instrument Serif', serif; font-style: italic; font-size: 24px; color: #E8E3D8; }
+  header .logo { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; font-style: italic; font-size: 24px; color: #E8E3D8; }
   header .logo span { color: #A8C5A0; }
-  header .sub { font-family: 'jf-openhuninn', 'DM Mono', monospace; font-size: 10px; color: #A8C5A0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
-  header .badge { font-family: 'jf-openhuninn', monospace; margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #A8C5A0; font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; }
+  header .sub { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; font-size: 10px; color: #A8C5A0; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+  header .badge { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; margin-left: auto; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #A8C5A0; font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; }
 
   .tabs { display: flex; border-bottom: 2px solid var(--border); padding: 0 40px; background: var(--surface); }
   .tab { padding: 13px 24px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--muted); transition: all 0.2s; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
@@ -34,7 +35,7 @@
   .panel { display: none; } .panel.active { display: block; }
 
   .section-head { margin-bottom: 22px; }
-  .section-head h2 { font-family: 'jf-openhuninn', 'Instrument Serif', serif; font-size: 26px; font-weight: 400; }
+  .section-head h2 { font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; font-size: 26px; font-weight: 400; }
   .section-head p { color: var(--muted); font-size: 13px; margin-top: 5px; line-height: 1.6; }
 
   /* Drop zone */
@@ -48,7 +49,7 @@
   .single-drop { max-width: 480px; }
 
   /* Buttons */
-  .btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'jf-openhuninn', sans-serif; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn { padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover:not(:disabled) { background: #1e3329; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,74,62,0.25); }
   .btn-secondary { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
@@ -98,7 +99,7 @@
   .file-name { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .file-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 1px; }
   .rot-tag { background: var(--accent); color: white; font-family: 'DM Mono', monospace; font-size: 10px; padding: 1px 7px; border-radius: 8px; margin-left: 6px; vertical-align: middle; }
-  .expand-btn { background: none; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--muted); padding: 4px 10px; transition: all 0.15s; white-space: nowrap; font-family: 'jf-openhuninn', sans-serif; flex-shrink: 0; }
+  .expand-btn { background: none; border: 1.5px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--muted); padding: 4px 10px; transition: all 0.15s; white-space: nowrap; font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; flex-shrink: 0; }
   .expand-btn:hover { border-color: var(--accent); color: var(--accent); }
   .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; line-height: 1; flex-shrink: 0; }
   .remove-btn:hover { background: #fee; color: var(--red); }
@@ -108,7 +109,7 @@
   .rotate-panel.open { display: block; }
   .rp-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
   .rp-toolbar .rp-label { font-size: 12px; color: var(--muted); margin-right: 2px; }
-  .rot-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s; font-family: 'jf-openhuninn', sans-serif; white-space: nowrap; }
+  .rot-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s; font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; white-space: nowrap; }
   .rot-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* Thumbnail grid — MERGE */
@@ -169,7 +170,7 @@
   .range-row input[type=number] { width: 58px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; font-size: 12px; font-family: 'DM Mono', monospace; background: var(--bg); color: var(--text); text-align: center; }
   .range-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 14px; padding: 3px 6px; border-radius: 4px; }
   .range-del:hover { background: #fee; color: var(--red); }
-  .add-range-btn { background: transparent; border: 1.5px dashed var(--border); color: var(--muted); border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer; width: 100%; margin-top: 4px; transition: all 0.2s; font-family: 'jf-openhuninn', sans-serif; }
+  .add-range-btn { background: transparent; border: 1.5px dashed var(--border); color: var(--muted); border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer; width: 100%; margin-top: 4px; transition: all 0.2s; font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif; }
   .add-range-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 
