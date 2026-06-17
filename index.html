@@ -109,7 +109,7 @@
   /* Thumbnail grid — MERGE */
   .thumb-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .thumb-cell {
-    width: 80px; text-align: center; cursor: pointer;
+    width: 130px; text-align: center; cursor: pointer;
     border: 2px solid var(--border); border-radius: 7px;
     padding: 5px 4px 6px; background: white;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -117,8 +117,8 @@
   }
   .thumb-cell:hover { border-color: var(--accent); }
   .thumb-cell.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,74,62,0.15); }
-  .thumb-cell canvas { width: 68px !important; height: auto !important; display: block; margin: 0 auto; border-radius: 3px; }
-  .thumb-cell .thumb-loading { width: 68px; height: 90px; background: var(--surface2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); }
+  .thumb-cell canvas { width: 118px !important; height: auto !important; display: block; margin: 0 auto; border-radius: 3px; }
+  .thumb-cell .thumb-loading { width: 118px; height: 155px; background: var(--surface2); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); }
   .thumb-cell .thumb-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1; }
   .thumb-cell .rot-overlay {
     position: absolute; top: 3px; right: 3px;
@@ -128,7 +128,7 @@
   }
   .thumb-cell.has-rot .rot-overlay { display: block; }
   /* canvas rotation preview */
-  .thumb-cell .canvas-wrap { display: flex; align-items: center; justify-content: center; min-height: 90px; }
+  .thumb-cell .canvas-wrap { display: flex; align-items: center; justify-content: center; min-height: 155px; }
   .thumb-cell .canvas-wrap canvas { transition: transform 0.25s; }
 
   /* Thumbnail grid — STANDALONE ROTATE */
@@ -496,7 +496,7 @@ async function renderMergeThumbs(fi) {
   for (let pi=0; pi<f.pages; pi++) {
     const wrap = document.getElementById(`cw-${fi}-${pi}`);
     if (!wrap) continue;
-    const canvas = await renderThumb(f.pdfJsDoc, pi, f.rotations[pi], 68);
+    const canvas = await renderThumb(f.pdfJsDoc, pi, f.rotations[pi], 118);
     wrap.innerHTML='';
     wrap.appendChild(canvas);
   }
@@ -541,7 +541,7 @@ async function applyRotMerge(fi, deg, reset=false) {
     const wrap = document.getElementById(`cw-${fi}-${pi}`);
     if (wrap && f.pdfJsDoc) {
       wrap.innerHTML='<div class="thumb-loading">更新中</div>';
-      const canvas = await renderThumb(f.pdfJsDoc, pi, r, 68);
+      const canvas = await renderThumb(f.pdfJsDoc, pi, r, 118);
       wrap.innerHTML=''; wrap.appendChild(canvas);
     }
   }
@@ -586,10 +586,14 @@ async function mergePDFs() {
       lbl.textContent=`第 ${i+1}/${mergeFiles.length}：${f.name}`;
       bar.style.width=`${5+Math.round(i/mergeFiles.length*80)}%`;
       const src = await PDFLib.PDFDocument.load(f.bytes,{ignoreEncryption:true});
-      const srcPages = src.getPages();
-      f.rotations.forEach((deg,pi)=>{ if(pi<srcPages.length&&deg!==0){ const cur=srcPages[pi].getRotation().angle; srcPages[pi].setRotation(PDFLib.degrees((cur+deg)%360)); } });
       const pages = await merged.copyPages(src, src.getPageIndices());
-      pages.forEach(p=>merged.addPage(p));
+      pages.forEach((p, pi) => {
+        if (f.rotations[pi] && f.rotations[pi] !== 0) {
+          const cur = p.getRotation().angle;
+          p.setRotation(PDFLib.degrees((cur + f.rotations[pi]) % 360));
+        }
+        merged.addPage(p);
+      });
       await tick();
     }
     lbl.textContent='寫入…'; bar.style.width='92%';
