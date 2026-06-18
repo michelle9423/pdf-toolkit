@@ -7,7 +7,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
   @font-face {
-    font-family: 'jf-openhuninn', 'Noto Sans TC', sans-serif;
+    font-family: 'jf-openhuninn';
     src: url('https://cdn.jsdelivr.net/npm/open-huninn-font@2.1.0/font/jf-openhuninn-2.1.woff2') format('woff2'),
          url('https://cdn.jsdelivr.net/npm/open-huninn-font@2.1.0/font/jf-openhuninn-2.1.ttf') format('truetype');
     font-weight: normal; font-style: normal; font-display: swap;
@@ -217,7 +217,7 @@
 <header>
   <div>
     <div class="logo">PDF <span>工具箱</span></div>
-    <div class="sub">合併 · 分割 · 旋轉</div>
+    <div class="sub">合併 · 分割 · 旋轉 · 轉 JPG</div>
   </div>
   <div class="badge">純瀏覽器 · 無上傳</div>
 </header>
@@ -226,6 +226,7 @@
   <div class="tab active" onclick="switchTab('merge')"  id="tab-merge">🗂 合併 PDF</div>
   <div class="tab"        onclick="switchTab('split')"  id="tab-split">✂️ 分割 PDF</div>
   <div class="tab"        onclick="switchTab('rotate')" id="tab-rotate">🔄 旋轉頁面</div>
+  <div class="tab"        onclick="switchTab('tojpg')"  id="tab-tojpg">🖼 轉存 JPG</div>
 </div>
 
 <div class="content">
@@ -371,6 +372,63 @@
   </div>
 </div>
 
+
+<!-- ══════ TO JPG ══════ -->
+<div id="panel-tojpg" class="panel">
+  <div class="section-head">
+    <h2>轉存 JPG 圖片</h2>
+    <p>將 PDF 每頁轉成 JPG 圖片檔案。可選擇解析度與品質，每頁個別下載。</p>
+  </div>
+  <div class="drop-zone single-drop" id="tojpg-drop"
+    ondragover="handleDragOver(event,'tojpg-drop')" ondragleave="handleDragLeave('tojpg-drop')" ondrop="handleDrop(event,'tojpg')">
+    <input type="file" id="tojpg-input" accept=".pdf" onchange="handleFiles(event,'tojpg')">
+    <div class="drop-icon">🖼</div>
+    <div class="drop-title">點擊選擇或拖曳 PDF</div>
+    <div class="drop-sub">單次一個檔案</div>
+  </div>
+  <div id="tojpg-filerow" style="display:none;margin-top:10px;"></div>
+  <div id="tojpg-options" style="display:none;margin-top:18px;">
+    <p style="font-size:13px;font-weight:500;margin-bottom:10px;color:var(--muted);">輸出設定</p>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px;">
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">解析度（DPI）</label>
+        <div style="display:flex;gap:6px;">
+          <div class="split-mode-btn" id="dpi-96"  onclick="setDPI(96)"  style="flex:none;padding:8px 14px;">96</div>
+          <div class="split-mode-btn active" id="dpi-150" onclick="setDPI(150)" style="flex:none;padding:8px 14px;">150</div>
+          <div class="split-mode-btn" id="dpi-300" onclick="setDPI(300)" style="flex:none;padding:8px 14px;">300</div>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;">JPG 品質</label>
+        <div style="display:flex;gap:6px;">
+          <div class="split-mode-btn" id="q-70" onclick="setQuality(0.7)" style="flex:none;padding:8px 14px;">70%</div>
+          <div class="split-mode-btn active" id="q-85" onclick="setQuality(0.85)" style="flex:none;padding:8px 14px;">85%</div>
+          <div class="split-mode-btn" id="q-95" onclick="setQuality(0.95)" style="flex:none;padding:8px 14px;">95%</div>
+        </div>
+      </div>
+    </div>
+    <div id="tojpg-preview-grid" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;"></div>
+    <div class="action-bar">
+      <div class="stats" id="tojpg-stats"></div>
+      <button class="btn btn-secondary" onclick="clearSingle('tojpg')">🗑 清除</button>
+      <button class="btn btn-primary" id="tojpg-btn" onclick="exportJPG()">轉存全部 JPG</button>
+    </div>
+  </div>
+  <div class="progress-wrap" id="tojpg-progress" style="display:none;">
+    <div class="progress-bar-bg"><div class="progress-bar" id="tojpg-bar"></div></div>
+    <div class="progress-label" id="tojpg-plabel"></div>
+  </div>
+  <div class="result-card" id="tojpg-result">
+    <div class="result-icon">✅</div>
+    <div class="result-info">
+      <div class="result-title" id="tojpg-rtitle"></div>
+      <div class="result-meta"  id="tojpg-rmeta"></div>
+    </div>
+  </div>
+  <div class="alert alert-error" id="tojpg-error"></div>
+  <div class="alert alert-info"  id="tojpg-info"></div>
+</div>
+
 </div><!-- /content -->
 
 <!-- Libraries -->
@@ -389,6 +447,7 @@ const mergeFiles = [];
 const singleState = {
   split:  { name:'', size:0, pages:0, bytes:null },
   rotate: { name:'', size:0, pages:0, bytes:null, rotations:[], pdfJsDoc:null },
+  tojpg:  { name:'', size:0, pages:0, bytes:null, pdfJsDoc:null },
 };
 
 let dragSrcIdx = null;
@@ -441,9 +500,13 @@ async function addFiles(mode, files) {
     const bytes = await readBytes(file);
     let pages = 0, pdfJsDoc = null;
     try { const p = await PDFLib.PDFDocument.load(bytes,{ignoreEncryption:true}); pages = p.getPageCount(); } catch(e){}
-    if (mode==='rotate') {
+    if (mode==='rotate' || mode==='tojpg') {
       try { pdfJsDoc = await pdfjsLib.getDocument({data: bytes.slice()}).promise; } catch(e){}
-      singleState.rotate = { name:file.name, size:file.size, pages, bytes, rotations:Array(pages).fill(0), pdfJsDoc };
+      if (mode === 'rotate') {
+        singleState.rotate = { name:file.name, size:file.size, pages, bytes, rotations:Array(pages).fill(0), pdfJsDoc };
+      } else {
+        singleState.tojpg = { name:file.name, size:file.size, pages, bytes, pdfJsDoc };
+      }
     } else {
       singleState.split = { name:file.name, size:file.size, pages, bytes };
     }
@@ -704,6 +767,22 @@ function renderSingle(mode) {
     document.getElementById('rotate-stats').innerHTML=`<strong>${s.name}</strong> &nbsp;·&nbsp; <strong>${s.pages}</strong> 頁`;
     renderRotateGrid();
   }
+  if (mode==='tojpg') {
+    const s=singleState.tojpg;
+    document.getElementById('tojpg-filerow').style.display='block';
+    document.getElementById('tojpg-filerow').innerHTML=`
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px;">
+        <span style="font-size:20px;">📄</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.name)}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">${fmtSize(s.size)} · ${s.pages} 頁</div>
+        </div>
+        <button class="remove-btn" onclick="clearSingle('tojpg')">✕</button>
+      </div>`;
+    document.getElementById('tojpg-options').style.display='block';
+    document.getElementById('tojpg-stats').innerHTML=`<strong>${s.name}</strong> &nbsp;·&nbsp; <strong>${s.pages}</strong> 頁`;
+    renderJPGPreviews();
+  }
 }
 
 // ─── Standalone rotate grid ───
@@ -760,9 +839,16 @@ async function applyRotSingle(deg, reset=false) {
 }
 
 function clearSingle(mode) {
-  singleState[mode]={name:'',size:0,pages:0,bytes:null,rotations:[],pdfJsDoc:null};
+  if (mode==='split') {
+    singleState.split={name:'',size:0,pages:0,bytes:null};
+  } else if (mode==='rotate') {
+    singleState.rotate={name:'',size:0,pages:0,bytes:null,rotations:[],pdfJsDoc:null};
+  } else if (mode==='tojpg') {
+    singleState.tojpg={name:'',size:0,pages:0,bytes:null,pdfJsDoc:null};
+  }
   if (mode==='split') { document.getElementById('split-filerow').style.display='none'; document.getElementById('split-options').style.display='none'; document.getElementById('range-list').innerHTML=''; rangeIdx=0; }
   if (mode==='rotate') { document.getElementById('rotate-options').style.display='none'; document.getElementById('page-grid').innerHTML=''; }
+  if (mode==='tojpg') { document.getElementById('tojpg-filerow').style.display='none'; document.getElementById('tojpg-options').style.display='none'; document.getElementById('tojpg-preview-grid').innerHTML=''; document.getElementById('tojpg-info').classList.remove('show'); }
   document.getElementById(mode+'-result').classList.remove('show'); hideError(mode);
 }
 
@@ -848,10 +934,17 @@ async function rotatePDF() {
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> 處理中…';
   prog.style.display='block'; bar.style.width='20%'; lbl.textContent='載入 PDF…';
   try {
-    const pdfDoc=await PDFLib.PDFDocument.load(s.bytes,{ignoreEncryption:true});
-    bar.style.width='55%'; lbl.textContent='套用旋轉…';
+    let pdfDoc=await PDFLib.PDFDocument.load(s.bytes,{ignoreEncryption:true});
+    bar.style.width='45%'; lbl.textContent='套用旋轉…';
     const pages=pdfDoc.getPages();
-    s.rotations.forEach((deg,i)=>{if(i<pages.length&&deg!==0){const cur=pages[i].getRotation().angle;pages[i].setRotation(PDFLib.degrees((cur+deg)%360));}});
+    pages.forEach((p,i)=>{
+      const deg=s.rotations[i]||0;
+      if(deg!==0){const cur=p.getRotation().angle||0; p.setRotation(PDFLib.degrees((cur+deg)%360));}
+    });
+    // save+reload to bake rotations into PDF structure
+    bar.style.width='65%'; lbl.textContent='確認旋轉…';
+    const bakedBytes=await pdfDoc.save();
+    pdfDoc=await PDFLib.PDFDocument.load(bakedBytes);
     bar.style.width='80%'; lbl.textContent='寫入…';
     const bytes=await pdfDoc.save({useObjectStreams:true}); bar.style.width='100%';
     const outName=s.name.replace(/\.pdf$/i,'_rotated.pdf');
@@ -916,6 +1009,98 @@ function closeLightbox(e) {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open'); });
+
+// ═══════════════════════════════════════════════════
+// TO JPG
+// ═══════════════════════════════════════════════════
+let jpgDPI = 150;
+let jpgQuality = 0.85;
+
+function setDPI(dpi) {
+  jpgDPI = dpi;
+  [96,150,300].forEach(d => document.getElementById('dpi-'+d)?.classList.toggle('active', d===dpi));
+}
+function setQuality(q) {
+  jpgQuality = q;
+  // 用 Math.round 避免浮點數比較錯誤 (e.g. 85/100 !== 0.85 in JS)
+  const qPct = Math.round(q * 100);
+  [70,85,95].forEach(v => document.getElementById('q-'+v)?.classList.toggle('active', v===qPct));
+}
+
+async function renderJPGPreviews() {
+  const s = singleState.tojpg;
+  if (!s.pdfJsDoc) return;
+  const grid = document.getElementById('tojpg-preview-grid');
+  grid.innerHTML = Array.from({length: s.pages}, (_, i) => `
+    <div class="page-thumb" style="cursor:default;">
+      <div class="canvas-wrap" id="jpgcw-${i}"><div class="thumb-loading">載入中</div></div>
+      <div class="thumb-num">第 ${i+1} 頁</div>
+    </div>`).join('');
+  for (let i = 0; i < s.pages; i++) {
+    const wrap = document.getElementById('jpgcw-'+i);
+    if (!wrap) continue;
+    const canvas = await renderThumb(s.pdfJsDoc, i, 0, 84);
+    wrap.innerHTML = '';
+    wrap.appendChild(canvas);
+  }
+}
+
+async function exportJPG() {
+  const s = singleState.tojpg;
+  if (!s.bytes) return showError('tojpg', '請先選擇 PDF');
+  const btn = document.getElementById('tojpg-btn');
+  const prog = document.getElementById('tojpg-progress');
+  const bar  = document.getElementById('tojpg-bar');
+  const lbl  = document.getElementById('tojpg-plabel');
+  const result = document.getElementById('tojpg-result');
+  const info   = document.getElementById('tojpg-info');
+  hideError('tojpg'); result.classList.remove('show'); info.classList.remove('show');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> 轉換中…';
+  prog.style.display = 'block'; bar.style.width = '0%';
+  if (s.pages > 5) {
+    info.textContent = '⚠️ 超過 5 頁，瀏覽器可能詢問是否允許多個下載，請點「允許」。';
+    info.classList.add('show');
+  }
+
+  try {
+    const scale = jpgDPI / 96;
+    const base = s.name.replace(/\.pdf$/i, '');
+    for (let i = 0; i < s.pages; i++) {
+      bar.style.width = `${Math.round((i / s.pages) * 95)}%`;
+      lbl.textContent = `轉換第 ${i+1} / ${s.pages} 頁…`;
+      const page = await s.pdfJsDoc.getPage(i + 1);
+      const vpNatural = page.getViewport({ scale: 1 });
+      const vp = page.getViewport({ scale, rotation: vpNatural.rotation });
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(vp.width);
+      canvas.height = Math.round(vp.height);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      // convert to JPG blob and download
+      await new Promise(resolve => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${base}_p${i+1}.jpg`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+          resolve();
+        }, 'image/jpeg', jpgQuality);
+      });
+      await new Promise(r => setTimeout(r, 150));
+      await tick();
+    }
+    bar.style.width = '100%';
+    document.getElementById('tojpg-rtitle').textContent = `✓ 共輸出 ${s.pages} 張 JPG`;
+    document.getElementById('tojpg-rmeta').textContent = `${base}.pdf · ${jpgDPI} DPI · 品質 ${Math.round(jpgQuality*100)}%`;
+    result.classList.add('show');
+  } catch(e) { showError('tojpg', '轉換失敗：' + e.message); }
+  finally {
+    btn.disabled = false; btn.innerHTML = '轉存全部 JPG';
+    setTimeout(() => { prog.style.display = 'none'; }, 1500);
+  }
+}
+
 </script>
 </body>
 </html>
